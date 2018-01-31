@@ -1,9 +1,22 @@
+
 import React from 'react';
 import Link from 'component/link';
 
-class VideoPlayButton extends React.PureComponent {
+type Props = {
+  play: string => void,
+  isLoading: boolean,
+  uri: string,
+  mediaType: string,
+  fileInfo: ?{},
+};
+
+class VideoPlayButton extends React.PureComponent<Props> {
+  constructor() {
+    super();
+    (this: any).keyDownListener = this.onKeyDown.bind(this);
+  }
+
   componentDidMount() {
-    this.keyDownListener = this.onKeyDown.bind(this);
     document.addEventListener('keydown', this.keyDownListener);
   }
 
@@ -11,7 +24,7 @@ class VideoPlayButton extends React.PureComponent {
     document.removeEventListener('keydown', this.keyDownListener);
   }
 
-  onKeyDown(event) {
+  onKeyDown(event: SyntheticKeyboardEvent<*>) {
     if (event.target.tagName.toLowerCase() !== 'input' && event.code === 'Space') {
       event.preventDefault();
       this.watch();
@@ -23,28 +36,24 @@ class VideoPlayButton extends React.PureComponent {
   }
 
   render() {
-    const { button, label, isLoading, fileInfo, mediaType } = this.props;
+    const { isLoading, fileInfo, mediaType } = this.props;
 
     /*
-     title={
-     isLoading ? "Video is Loading" :
-     !costInfo ? "Waiting on cost info..." :
-     fileInfo === undefined ? "Waiting on file info..." : ""
-     }
+      TODO: Add title back to button
+       title={
+       isLoading ? "Video is Loading" :
+       !costInfo ? "Waiting on cost info..." :
+       fileInfo === undefined ? "Waiting on file info..." : ""
+       }
      */
 
     const disabled = isLoading || fileInfo === undefined;
-    const icon = ['audio', 'video'].indexOf(mediaType) !== -1 ? 'icon-play' : 'icon-folder-o';
+    const doesPlayback = ['audio', 'video'].indexOf(mediaType) !== -1;
+    const icon = doesPlayback ? 'Play' : 'Folder';
+    const label = doesPlayback ? 'Play' : 'View';
 
     return (
-      <Link
-        button={button || null}
-        disabled={disabled}
-        label={label || ''}
-        className="video__play-button"
-        icon={icon}
-        onClick={() => this.watch()}
-      />
+      <Link secondary disabled={disabled} label={label} icon={icon} onClick={() => this.watch()} />
     );
   }
 }
